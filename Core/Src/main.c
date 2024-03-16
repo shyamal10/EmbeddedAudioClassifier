@@ -21,7 +21,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+int ret;
+char dataBuffer[] = "This is Shyamal Singh"; // Sample message
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -97,6 +98,22 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
+
+	  //Master (STM32) initiate send to slave (Arduino Uno)
+
+	  ret = HAL_I2C_Master_Transmit(&hi2c1, (4 << 1), (uint8_t *)dataBuffer, sizeof(dataBuffer), 100);
+	  if (ret != HAL_OK) // Reciever not present
+	  {
+		  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_7, 1); // Turns on onboard LED
+
+	  }
+	  if (ret == HAL_OK) // Master successfully sends data to slave
+	  {
+		  HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_7);
+		  HAL_Delay(100);
+	  }
+
+	  HAL_Delay(1000);
 
     /* USER CODE BEGIN 3 */
   }
