@@ -21,17 +21,31 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-int ret;
-char dataBuffer[] = "123abc"; // Sample message
+#include <stdarg.h>
+#include "edge-impulse-sdk/classifier/ei_run_classifier.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
 
+// Define Audio Buffers pointers and selectors used for input signal
+
+typedef struct {
+	int16_t *buffers[2];
+	uint8_t buf_select;
+	volatile uint8_t buf_ready;
+	uint32 buf_count;
+	uint32 n_samples;
+}inference_t;
+
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+
+#define I2S_BUF_LEN 6400 // 4x desired size to downsample and throw out 1 channel
+#define I2S_BUF_SKIP 4// (2x L/R Channel) * (2x Sample Rate)
 
 /* USER CODE END PD */
 
@@ -44,7 +58,8 @@ char dataBuffer[] = "123abc"; // Sample message
 I2C_HandleTypeDef hi2c1;
 
 /* USER CODE BEGIN PV */
-
+int ret;
+char dataBuffer[] = "123abc"; // Sample message
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -57,6 +72,21 @@ static void MX_I2C1_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+void vprint(const char *fmt, va_list argp)
+{
+    char string[200];
+    if(0 < vsprintf(string, fmt, argp)) // build string
+    {
+        HAL_UART_Transmit(&huart1, (uint8_t*)string, strlen(string), 0xffffff); // send message via UART
+    }
+}
+
+void ei_printf(const char *format, ...) {
+    va_list myargs;
+    va_start(myargs, format);
+    vprint(format, myargs);
+    va_end(myargs);
+}
 
 /* USER CODE END 0 */
 
